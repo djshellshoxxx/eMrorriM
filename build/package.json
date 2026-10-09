@@ -1,0 +1,17 @@
+{
+  "name": "toolkit-vendor",
+  "private": true,
+  "description": "Reproducible build of vendor.js (audited crypto libraries bundled for offline use). Not part of the shipped site.",
+  "type": "module",
+  "scripts": { "build": "node build.mjs" },
+  "dependencies": {
+    "@noble/hashes": "2.4.0",
+    "@scure/base": "2.4.0",
+    "@scure/bip32": "2.4.0",
+    "@scure/bip39": "2.4.0",
+    "esbuild": "0.28.2",
+    "openpgp": "6.3.2",
+    "qrcode-generator": "2.0.4",
+    "shamir-secret-sharing": "0.0.4"
+  }
+}

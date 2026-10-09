@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; form-action 'none'; base-uri 'none'">
+<title>Cypherpunk Toolkit</title>
+<meta name="description" content="Offline wallet, secret splitting, steganography, PGP and a self-replicating mirror kit. Runs entirely in your browser, no servers.">
+<meta name="theme-color" content="#0b0f0c">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>CYPHERPUNK TOOLKIT</h1>
+  <p class="tag">Keys, secrets, hidden messages and unstoppable copies. All of it runs in your browser. Nothing is sent anywhere.</p>
+  <p class="status"><span id="net" class="dot"></span><span id="netTxt">checking...</span> &middot; <span id="swTxt">offline cache: checking...</span> &middot; <span id="modeTxt"></span></p>
+  <nav id="tabs" role="tablist" aria-label="Tools">
+    <button role="tab" data-tab="wallet">Wallet</button>
+    <button role="tab" data-tab="split">Split</button>
+    <button role="tab" data-tab="hide">Hide</button>
+    <button role="tab" data-tab="pgp">PGP</button>
+    <button role="tab" data-tab="mirror">Mirror</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ================= WALLET ================= -->
+<section class="panel" id="tab-wallet" role="tabpanel" hidden>
+  <h2>Offline Bitcoin wallet</h2>
+  <p class="netwarn warn"></p>
+  <p>Generates a recovery phrase (BIP39) and native-segwit addresses (BIP84, <code>m/84'/0'/0'/0/i</code>) locally. Nothing is stored or transmitted.</p>
+  <div class="row">
+    <select id="wWords" aria-label="Phrase length">
+      <option value="128">12 words</option>
+      <option value="256">24 words</option>
+    </select>
+    <button id="wGen" class="primary">Generate new phrase</button>
+    <button id="wTest">Run self-test</button>
+    <button id="wClear">Clear screen</button>
+  </div>
+  <label for="wMnemonic">Recovery phrase (type or paste one to restore)</label>
+  <textarea id="wMnemonic" rows="3" autocomplete="off" autocapitalize="off" spellcheck="false"></textarea>
+  <div class="row">
+    <div class="field"><label for="wPass">Optional passphrase (the "25th word")</label>
+      <input id="wPass" type="password" autocomplete="off"></div>
+    <div class="field small"><label for="wCount">Addresses</label>
+      <select id="wCount"><option>1</option><option selected>5</option><option>10</option><option>20</option></select></div>
+    <button id="wDerive">Show addresses</button>
+  </div>
+  <p id="wStatus" class="out" role="status"></p>
+  <ul id="wList" class="plain"></ul>
+  <div class="row"><button id="wPrint" hidden>Print paper copy</button></div>
+  <details>
+    <summary>Read before using real money</summary>
+    <ul>
+      <li>Anyone who sees the phrase controls the funds. Write it on paper, never photograph it or store it in cloud notes.</li>
+      <li>This page uses your browser's secure random generator and audited open-source libraries (<code>@scure/bip39</code>, <code>@scure/bip32</code>), but a browser tab is not a hardware wallet. Your device may have malware or extensions that can read the screen.</li>
+      <li>For serious amounts, generate on a clean offline device (the page works with the network off), and send a small test amount first.</li>
+      <li>Run the self-test. It checks the code against the official BIP84 test vector.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ================= SPLIT ================= -->
+<section class="panel" id="tab-split" role="tabpanel" hidden>
+  <h2>Split a secret (Shamir)</h2>
+  <p>Cut a secret into <b>N</b> shares so that any <b>K</b> of them rebuild it, while fewer than K reveal nothing at all. Good for seed phrases and inheritance plans.</p>
+  <label for="sSecret">Secret to split</label>
+  <textarea id="sSecret" rows="3" autocomplete="off" spellcheck="false"></textarea>
+  <div class="row">
+    <div class="field small"><label for="sN">Shares (N)</label><input id="sN" type="number" min="2" max="20" value="5"></div>
+    <div class="field small"><label for="sK">Needed (K)</label><input id="sK" type="number" min="2" max="20" value="3"></div>
+    <button id="sSplit" class="primary">Split</button>
+  </div>
+  <p id="sStatus" class="out" role="status"></p>
+  <ol id="sShares" class="plain"></ol>
+
+  <h3>Recover</h3>
+  <label for="sIn">Paste at least K shares, one per line</label>
+  <textarea id="sIn" rows="4" autocomplete="off" spellcheck="false"></textarea>
+  <div class="row"><button id="sCombine">Recover secret</button><button id="sClear">Clear screen</button></div>
+  <label for="sOut">Recovered secret</label>
+  <textarea id="sOut" rows="3" readonly></textarea>
+  <p class="muted">Each share carries a built-in check, so mixed-up or missing shares give an error instead of a wrong answer. Store shares in different places and with different people.</p>
+</section>
+
+<!-- ================= HIDE ================= -->
+<section class="panel" id="tab-hide" role="tabpanel" hidden>
+  <h2>Hide a message in a picture</h2>
+  <p>Encrypts your message (AES-256-GCM, key from your passphrase), then hides the result in the lowest bits of an ordinary image. To everyone else it is just a picture.</p>
+
+  <h3>Hide</h3>
+  <label for="hCover">Cover image (any picture)</label>
+  <input id="hCover" type="file" accept="image/*">
+  <label for="hMsg">Message</label>
+  <textarea id="hMsg" rows="3" spellcheck="false"></textarea>
+  <div class="row">
+    <div class="field"><label for="hPass">Passphrase</label><input id="hPass" type="password" autocomplete="off"></div>
+    <label class="check"><input id="hNoise" type="checkbox" checked> Fill unused space with noise</label>
+  </div>
+  <div class="row"><button id="hGo" class="primary">Hide and download PNG</button></div>
+  <p id="hStatus" class="out" role="status"></p>
+
+  <h3>Reveal</h3>
+  <label for="rFile">Image with a hidden message (PNG)</label>
+  <input id="rFile" type="file" accept="image/png">
+  <div class="row">
+    <div class="field"><label for="rPass">Passphrase</label><input id="rPass" type="password" autocomplete="off"></div>
+    <button id="rGo">Reveal</button>
+  </div>
+  <label for="rOut">Revealed message</label>
+  <textarea id="rOut" rows="3" readonly></textarea>
+  <p id="rStatus" class="out" role="status"></p>
+
+  <details>
+    <summary>Limits you should know about</summary>
+    <ul>
+      <li>Send the PNG as a <b>file</b>. Messengers and social sites that recompress images (JPEG) destroy the hidden data.</li>
+      <li>The message is strongly encrypted, so nobody can read it without the passphrase. But specialist analysis can sometimes <i>detect</i> that something is hidden. Hiding is not the same as being undetectable.</li>
+      <li>Wrong passphrase and "no message here" look identical on purpose.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ================= PGP ================= -->
+<section class="panel" id="tab-pgp" role="tabpanel" hidden>
+  <h2>PGP keys, encryption and signatures</h2>
+  <p>OpenPGP via the open-source <code>openpgp.js</code>, running locally. Compatible with GnuPG, Thunderbird, Proton and others.</p>
+
+  <details open>
+    <summary>1. Generate a key pair</summary>
+    <div class="row">
+      <div class="field"><label for="gName">Name</label><input id="gName" autocomplete="off"></div>
+      <div class="field"><label for="gEmail">Email (optional)</label><input id="gEmail" autocomplete="off"></div>
+    </div>
+    <div class="row">
+      <div class="field"><label for="gPass">Passphrase to protect the private key</label><input id="gPass" type="password" autocomplete="off"></div>
+      <button id="gGo" class="primary">Generate (Curve25519)</button>
+    </div>
+    <p id="gStatus" class="out" role="status"></p>
+    <label for="gPub">Public key (share this freely)</label>
+    <textarea id="gPub" rows="4" readonly></textarea>
+    <div class="row"><button class="copy" data-copy="gPub">Copy public key</button></div>
+    <label for="gPriv">Private key (keep secret, back it up offline)</label>
+    <textarea id="gPriv" rows="4" readonly></textarea>
+    <div class="row"><button class="copy" data-copy="gPriv">Copy private key</button></div>
+  </details>
+
+  <details>
+    <summary>2. Encrypt a message</summary>
+    <label for="eKeys">Recipient public key(s), paste one or several</label>
+    <textarea id="eKeys" rows="4" spellcheck="false"></textarea>
+    <label for="eMsg">Message</label>
+    <textarea id="eMsg" rows="3"></textarea>
+    <div class="row"><button id="eGo" class="primary">Encrypt</button></div>
+    <p id="eStatus" class="out" role="status"></p>
+    <textarea id="eOut" rows="5" readonly></textarea>
+    <div class="row"><button class="copy" data-copy="eOut">Copy</button></div>
+  </details>
+
+  <details>
+    <summary>3. Decrypt a message</summary>
+    <label for="dKey">Your private key</label>
+    <textarea id="dKey" rows="4" spellcheck="false"></textarea>
+    <div class="row"><div class="field"><label for="dPass">Key passphrase</label><input id="dPass" type="password" autocomplete="off"></div></div>
+    <label for="dMsg">Encrypted message</label>
+    <textarea id="dMsg" rows="4" spellcheck="false"></textarea>
+    <div class="row"><button id="dGo" class="primary">Decrypt</button></div>
+    <p id="dStatus" class="out" role="status"></p>
+    <textarea id="dOut" rows="3" readonly></textarea>
+  </details>
+
+  <details>
+    <summary>4. Sign a message</summary>
+    <label for="sgKey">Your private key</label>
+    <textarea id="sgKey" rows="4" spellcheck="false"></textarea>
+    <div class="row"><div class="field"><label for="sgPass">Key passphrase</label><input id="sgPass" type="password" autocomplete="off"></div></div>
+    <label for="sgMsg">Text to sign</label>
+    <textarea id="sgMsg" rows="3"></textarea>
+    <div class="row"><button id="sgGo" class="primary">Sign</button></div>
+    <p id="sgStatus" class="out" role="status"></p>
+    <textarea id="sgOut" rows="6" readonly></textarea>
+    <div class="row"><button class="copy" data-copy="sgOut">Copy</button></div>
+  </details>
+
+  <details>
+    <summary>5. Verify a signature</summary>
+    <label for="vKey">Signer's public key</label>
+    <textarea id="vKey" rows="4" spellcheck="false"></textarea>
+    <label for="vMsg">Signed message</label>
+    <textarea id="vMsg" rows="6" spellcheck="false"></textarea>
+    <div class="row"><button id="vGo" class="primary">Verify</button></div>
+    <p id="vStatus" class="out" role="status"></p>
+  </details>
+</section>
+
+<!-- ================= MIRROR ================= -->
+<section class="panel" id="tab-mirror" role="tabpanel" hidden>
+  <h2>Mirror this toolkit</h2>
+  <p>Takedowns only work on a single copy. This page packages itself so anyone can re-host it in under a minute.</p>
+  <div class="grid">
+    <button id="btnZip">Download ZIP<small>All files, ready to upload to any static host</small></button>
+    <button id="btnSingle">Download single file<small>One .html with everything inside. Email it, USB it, open it offline</small></button>
+    <button id="btnScript">Copy shell installer<small>Paste into a terminal (PuTTY etc.) to rebuild the site in one go</small></button>
+    <button id="btnShare" hidden>Share files<small>Send the ZIP through your phone's share sheet</small></button>
+  </div>
+  <p id="mirrorMsg" class="out" role="status"></p>
+
+  <h3>Host it somewhere (60 seconds each)</h3>
+  <details open>
+    <summary>Any Linux box or VPS (fastest, paste one thing)</summary>
+    <ol>
+      <li>Click <b>Copy shell installer</b> above.</li>
+      <li>Paste it into your terminal and press Enter. It creates a folder <code>cypherpunk-toolkit</code> with every file and checks them.</li>
+      <li>Serve it: <code>cd cypherpunk-toolkit &amp;&amp; python3 -m http.server 8080</code></li>
+      <li>Open <code>http://your-server-ip:8080/</code>. For HTTPS use Caddy: <code>caddy file-server --domain example.com --root .</code></li>
+    </ol>
+  </details>
+  <details>
+    <summary>GitHub Pages</summary>
+    <ol>
+      <li>Create a new repository and upload the unzipped files (drag and drop works on the GitHub web UI).</li>
+      <li>Settings, then Pages, choose <i>Deploy from a branch</i>, pick <code>main</code> and <code>/ (root)</code>.</li>
+      <li>Your copy appears at <code>https://USER.github.io/REPO/</code>.</li>
+    </ol>
+  </details>
+  <details>
+    <summary>Netlify Drop</summary>
+    <ol><li>Unzip the download.</li><li>Drag the folder onto <code>app.netlify.com/drop</code>.</li><li>You get a live URL straight away.</li></ol>
+  </details>
+  <details>
+    <summary>Cloudflare Pages</summary>
+    <ol><li>Workers &amp; Pages, then Create, then Pages, then Upload assets.</li><li>Upload the unzipped folder and deploy.</li></ol>
+  </details>
+  <details>
+    <summary>IPFS (no single host to take down)</summary>
+    <ol><li>Install IPFS, then run <code>ipfs add -r cypherpunk-toolkit</code>.</li><li>The last hash printed is the folder. Open it via any gateway as <code>/ipfs/HASH/</code>, or pin it with a pinning service.</li></ol>
+  </details>
+  <details>
+    <summary>No host at all</summary>
+    <ol><li>Download the <b>single file</b> version.</li><li>Double-click it. It runs from disk and can still make more copies of itself.</li><li>Pass it on by email, chat, or USB stick.</li></ol>
+  </details>
+
+  <h3>Install it (works offline afterwards)</h3>
+  <button id="btnInstall" hidden>Install app</button>
+  <p class="muted">No install button? In Chrome/Edge use the install icon in the address bar. On iOS use Share, then <i>Add to Home Screen</i>.</p>
+
+  <h3>Verify your copy</h3>
+  <p>Anyone can publish a tampered mirror. Compare these SHA-256 hashes with ones you trust (the original repo, or a signed message). If they match, the copy is identical.</p>
+  <table id="hashes"><thead><tr><th>File</th><th>Bytes</th><th>SHA-256</th></tr></thead><tbody></tbody></table>
+  <p>Bundle hash: <code id="bundleHash">computing...</code></p>
+
+  <details>
+    <summary>Why this is safe to run</summary>
+    <ul>
+      <li>No third-party scripts, fonts, analytics or CDNs. Every file is in the bundle.</li>
+      <li>A strict Content-Security-Policy blocks all outside connections. Read it in the page source.</li>
+      <li>The crypto libraries are bundled into <code>vendor.js</code> from open-source packages. The build recipe and exact versions are in <code>build/</code> so you can reproduce it yourself.</li>
+    </ul>
+  </details>
+</section>
+
+</main>
+
+<footer><p>Licensed as the rest of this repository. Fork it, change it, spread it. No warranty: you are responsible for how you use these tools.</p></footer>
+
+<script src="vendor.js"></script>
+<script src="core.js"></script>
+<script src="wallet.js"></script>
+<script src="split.js"></script>
+<script src="hide.js"></script>
+<script src="pgp.js"></script>
+<script src="mirror.js"></script>
+</body>
+</html>

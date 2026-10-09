@@ -1,0 +1,13 @@
+{
+  "name": "Cypherpunk Toolkit",
+  "short_name": "Toolkit",
+  "description": "Offline wallet, secret splitting, steganography, PGP and a self-replicating mirror kit.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0f0c",
+  "theme_color": "#0b0f0c",
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}

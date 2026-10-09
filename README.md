@@ -8,6 +8,7 @@ A single static page that runs entirely in the browser. No server, no accounts, 
 | Split | Shamir secret sharing (K of N) with a built-in check so wrong or mixed shares are detected |
 | Hide | Encrypts a message (AES-256-GCM, PBKDF2) and hides it in a PNG's lowest bits |
 | PGP | Generate keys, encrypt, decrypt, sign, verify (OpenPGP, Curve25519) |
+| Chat | Peer-to-peer encrypted chat over WebRTC. No chat server, nothing saved. You swap two copy-paste codes, then compare six verification words out loud to rule out interception. Optional disappearing messages, one-click wipe |
 | Mirror | Download the site as ZIP, as one HTML file, or as a paste-into-terminal installer; SHA-256 table; installable offline PWA |
 
 ## Host it
@@ -22,10 +23,13 @@ To reproduce it yourself and compare hashes:
     cd build && npm ci && npm run build
 
 ## Files
-`index.html style.css vendor.js core.js wallet.js split.js hide.js pgp.js mirror.js manifest.json icon.svg sw.js`
+`index.html style.css vendor.js core.js wallet.js split.js hide.js pgp.js chat.js mirror.js manifest.json icon.svg sw.js`
 If you add or rename a file, update the file lists in `mirror.js` and `sw.js`.
 
 ## Honest limits
+- Chat connects the two browsers directly. Your contact sees your IP address. "Across the internet" uses one public STUN server (editable) to find your address; "Same network only" uses no outside service. Very strict networks block direct connections, and there is deliberately no relay server.
+- Chat is only safe if you compare the six words over a different channel (a call, in person). Disappearing messages cannot stop screenshots.
+- Hide and PGP need WebCrypto, which browsers only offer on https:// or localhost (the page tells you if you are on plain http).
 - A browser tab is not a hardware wallet. For serious funds use clean offline hardware.
 - Steganography hides that a message exists from casual observers; specialist analysis may still detect it.
 - Mirroring means copies exist elsewhere, but any one host (including GitHub) can still remove its own copy.

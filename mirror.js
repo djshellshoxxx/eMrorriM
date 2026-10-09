@@ -5,7 +5,7 @@
   // Every file that makes up this site. Keep in sync with sw.js.
   const FILES = [
     'index.html', 'style.css', 'vendor.js', 'core.js', 'wallet.js', 'split.js',
-    'hide.js', 'pgp.js', 'mirror.js', 'manifest.json', 'icon.svg', 'sw.js'
+    'hide.js', 'pgp.js', 'chat.js', 'mirror.js', 'manifest.json', 'icon.svg', 'sw.js'
   ];
   const DIR = 'cypherpunk-toolkit';
   const say = (t, bad) => status('mirrorMsg', t, bad);

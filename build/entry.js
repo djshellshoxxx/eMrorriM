@@ -39,6 +39,7 @@ window.CP = {
   },
   shamir: { split, combine },
   sha256,
+  wordlist,
   openpgp,
   qrSvg
 };

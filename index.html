@@ -21,6 +21,7 @@
     <button role="tab" data-tab="split">Split</button>
     <button role="tab" data-tab="hide">Hide</button>
     <button role="tab" data-tab="pgp">PGP</button>
+    <button role="tab" data-tab="chat">Chat</button>
     <button role="tab" data-tab="mirror">Mirror</button>
   </nav>
 </header>
@@ -197,6 +198,103 @@
   </details>
 </section>
 
+<!-- ================= CHAT ================= -->
+<section class="panel" id="tab-chat" role="tabpanel" hidden>
+  <h2>Secret chat (peer to peer)</h2>
+  <p>Two people connect <b>directly</b>, browser to browser. There is no chat server, no account and nothing is saved. When either of you ends the session or closes the tab, the conversation is gone.</p>
+  <p id="cSupport" class="out"></p>
+
+  <div data-stages="idle">
+    <details>
+      <summary>Network settings</summary>
+      <label for="cNet">Where are you and your contact?</label>
+      <select id="cNet">
+        <option value="internet" selected>Across the internet (uses one public STUN server to find your address)</option>
+        <option value="lan">Same network only (no outside services at all)</option>
+      </select>
+      <label for="cStun">STUN server (only used for "Across the internet")</label>
+      <input id="cStun" value="stun:stun.l.google.com:19302" autocomplete="off" spellcheck="false">
+      <p class="muted">A STUN server only tells your browser its own public address. It never sees your messages. Your contact will see your IP address either way, because a direct connection needs it. Both of you should choose the same option.</p>
+    </details>
+    <div class="grid">
+      <button id="cStart">Start a chat<small>You go first. You get a code to send to your contact.</small></button>
+      <button id="cJoin">Join a chat<small>Your contact sent you a code.</small></button>
+    </div>
+    <details>
+      <summary>How it works, step by step</summary>
+      <ol>
+        <li>The person who starts gets a <b>code</b> and sends it to the other person by any channel (message, email, paper).</li>
+        <li>The other person pastes it and gets a <b>reply code</b>, and sends that back.</li>
+        <li>The starter pastes the reply. The two browsers connect directly.</li>
+        <li>Both of you read out six <b>verification words</b> over a call or in person. If they match, nobody is intercepting.</li>
+        <li>Chat. Nothing is written to disk, cookies or storage. Ending the session wipes the screen.</li>
+      </ol>
+    </details>
+  </div>
+
+  <div data-stages="starter" hidden>
+    <h3>Step 1: send this code to your contact</h3>
+    <textarea id="cOfferOut" rows="4" readonly></textarea>
+    <div class="row"><button class="copy" data-copy="cOfferOut">Copy code</button></div>
+    <h3>Step 2: paste their reply here</h3>
+    <textarea id="cReplyIn" rows="4" autocomplete="off" spellcheck="false"></textarea>
+    <div class="row"><button id="cConnect" class="primary">Connect</button></div>
+  </div>
+
+  <div data-stages="joiner" hidden>
+    <h3>Step 1: paste the code your contact sent you</h3>
+    <textarea id="cOfferIn" rows="4" autocomplete="off" spellcheck="false"></textarea>
+    <div class="row"><button id="cMakeReply" class="primary">Create reply</button></div>
+    <h3>Step 2: send this reply back</h3>
+    <textarea id="cAnswerOut" rows="4" readonly></textarea>
+    <div class="row"><button class="copy" data-copy="cAnswerOut">Copy reply</button></div>
+  </div>
+
+  <div data-stages="starter joiner connecting verify" hidden>
+    <div class="row"><button class="cancel">Cancel and start over</button></div>
+  </div>
+
+  <div data-stages="verify" hidden>
+    <h3>Check the connection is private</h3>
+    <p>Call each other, or meet in person, and read these six words aloud. <b>Do not</b> compare them in this chat or by text.</p>
+    <p id="cSas" class="sas"></p>
+    <div class="row">
+      <button id="cMatch" class="primary">We both see the same words</button>
+      <button id="cNoMatch">The words are different</button>
+    </div>
+    <p class="muted">If the words differ, someone altered the codes on the way. Stop and start again over a different channel.</p>
+  </div>
+
+  <div data-stages="chat lost" hidden>
+    <p class="muted">Verification words: <span id="cSasSmall"></span></p>
+    <div id="cLog" class="chatlog" aria-live="polite"></div>
+    <label for="cInput">Message (Enter to send, Shift+Enter for a new line)</label>
+    <textarea id="cInput" rows="2" maxlength="4000" autocomplete="off" spellcheck="false"></textarea>
+    <div class="row">
+      <button id="cSend" class="primary">Send</button>
+      <div class="field small"><label for="cTtl">Messages vanish after</label>
+        <select id="cTtl"><option value="0" selected>Never (until the session ends)</option><option value="30">30 seconds</option><option value="300">5 minutes</option><option value="3600">1 hour</option></select></div>
+      <button id="cEnd">End session and wipe</button>
+    </div>
+    <div data-stages="lost" hidden>
+      <div class="row"><button id="cClearLost" class="primary">Clear everything</button></div>
+    </div>
+  </div>
+
+  <p id="cStatus" class="out" role="status"></p>
+
+  <details>
+    <summary>What this does and does not protect</summary>
+    <ul>
+      <li><b>Protects:</b> the content of your messages. They travel only between your two browsers, encrypted (DTLS), with no server in between. Nothing is logged or stored by this page.</li>
+      <li><b>The six words</b> are what make it safe. Without them, someone who could change the codes in transit could sit in the middle. Always compare them out of band.</li>
+      <li><b>Does not hide:</b> your IP address from your contact (a direct connection needs it), and from the STUN server if you use one.</li>
+      <li><b>"Disappearing" messages</b> are removed from both screens, but nothing can stop your contact from taking a screenshot or copying text. Also check that your keyboard app is not recording what you type.</li>
+      <li>Very strict networks (some offices, some mobile carriers) block direct connections. This tool deliberately uses no relay server, so it will not connect there.</li>
+    </ul>
+  </details>
+</section>
+
 <!-- ================= MIRROR ================= -->
 <section class="panel" id="tab-mirror" role="tabpanel" hidden>
   <h2>Mirror this toolkit</h2>
@@ -273,6 +371,7 @@
 <script src="split.js"></script>
 <script src="hide.js"></script>
 <script src="pgp.js"></script>
+<script src="chat.js"></script>
 <script src="mirror.js"></script>
 </body>
 </html>

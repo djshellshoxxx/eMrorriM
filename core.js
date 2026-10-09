@@ -114,9 +114,16 @@
   // Disable a tool's buttons if the crypto bundle failed to load.
   const vendorOk = !!window.CP;
   if (!vendorOk) {
-    for (const b of document.querySelectorAll('#tab-wallet button, #tab-split button, #tab-pgp button.primary')) b.disabled = true;
+    for (const b of document.querySelectorAll('#tab-wallet button, #tab-split button, #tab-pgp button.primary, #tab-chat button')) b.disabled = true;
     const hdr = document.querySelector('header .tag');
     hdr.textContent = 'vendor.js failed to load, so wallet, split and PGP are disabled. Re-download the toolkit.';
+  }
+
+  // Hide and PGP need WebCrypto, which browsers only offer on https:// or localhost.
+  if (!(window.crypto && window.crypto.subtle)) {
+    const note = document.createElement('span');
+    note.textContent = ' · note: this address is not secure (http), so Hide and PGP are unavailable. Use https or localhost.';
+    document.querySelector('header .status').appendChild(note);
   }
 
   window.TK = { $, enc, dec, b64, unb64, b64url, unb64url, save, copyText, status, kb, vendorOk };

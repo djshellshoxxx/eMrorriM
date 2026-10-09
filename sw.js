@@ -1,7 +1,7 @@
-const CACHE = 'cypherpunk-toolkit-v1';
+const CACHE = 'cypherpunk-toolkit-v2';
 const FILES = [
   './', 'index.html', 'style.css', 'vendor.js', 'core.js', 'wallet.js', 'split.js',
-  'hide.js', 'pgp.js', 'mirror.js', 'manifest.json', 'icon.svg'
+  'hide.js', 'pgp.js', 'chat.js', 'mirror.js', 'manifest.json', 'icon.svg'
 ];
 
 self.addEventListener('install', e => {

@@ -33,3 +33,7 @@ If you add or rename a file, update the file lists in `mirror.js` and `sw.js`.
 - A browser tab is not a hardware wallet. For serious funds use clean offline hardware.
 - Steganography hides that a message exists from casual observers; specialist analysis may still detect it.
 - Mirroring means copies exist elsewhere, but any one host (including GitHub) can still remove its own copy.
+
+## Wiki
+
+Wiki source pages are in [docs/wiki/](docs/wiki/Home.md): architecture summary and codebase map. This README, including its Honest limits section, remains the authority.

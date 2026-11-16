@@ -1,5 +1,5 @@
 **Cypherpunk Toolkit**
 
-- [Home](Home)
-- [Architecture Summary](Architecture-Summary)
-- [Codebase Map](Codebase-Map)
+- [Home](Home.md)
+- [Architecture Summary](Architecture-Summary.md)
+- [Codebase Map](Codebase-Map.md)
